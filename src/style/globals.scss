@@ -1,0 +1,730 @@
+@import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+@import '../views//scss/menu.scss';
+@import '../views/scss/menuTab/menuTab.scss';
+@import '../views/scss/welcome.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+:root {
+  /* Cores baseadas na logo Bliss Burger */
+  --primary-color: #8b1a30;
+  /* Vermelho escuro/bordô mais próximo da imagem */
+  --primary-light: #a52941;
+  /* Vermelho mais claro harmonizando com o cabeçalho */
+  --primary-dark: #701525;
+  /* Vermelho mais escuro para contraste */
+  --accent-color: #ff6600;
+  /* Dourado/amarelo do logo para destaque */
+  --text-light: #fff;
+  /* Texto branco mantido */
+  --text-dark: #222;
+  /* Texto escuro ligeiramente ajustado */
+  --text-gray: #777;
+  /* Texto cinza ligeiramente ajustado */
+  --background-light: #fff;
+  /* Fundo branco mantido */
+  --background-gray: #f8f8f8;
+  /* Fundo cinza claro suavizado */
+  --border-color: #e5e5e5;
+  /* Cor de borda ligeiramente ajustada */
+}
+
+
+html,
+body {
+  background-color: #fcf6f5 !important;
+}
+
+
+
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-gray);
+}
+
+.empty-state__icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  color: var(--primary-light);
+}
+
+.empty-state__text {
+  color: var(--text-gray);
+  font-size: 16px;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item__info p {
+  margin: 5px 0;
+  color: var(--text-dark);
+}
+
+
+
+
+
+
+.adicionais {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.adicionais-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.adicional-item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adicional-item-icon {
+  font-size: 1.2em;
+}
+
+.adicional-item-name {
+  font-weight: 500;
+}
+
+.adicional-item-price {
+  color: #888;
+  margin-left: 10px;
+}
+
+.adicional-item-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.menu-item__additional-button {
+  background-color: #f8f9fa;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  margin-left: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+.additional-tag {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  margin-bottom: 5px;
+}
+
+
+.menu-item--with-additionals {
+  border: 2px solid #8b1a30;
+  /* Cor da sua marca */
+  box-shadow: 0 0 10px rgba(139, 26, 48, 0.2);
+}
+
+
+
+
+.adicionais-container {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.adicionais-title {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #8b1a30;
+}
+
+.combos-selector {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 15px;
+}
+
+.combo-option {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.combo-option:hover {
+  border-color: #8b1a30;
+  background-color: #f0f0f0;
+}
+
+.combo-option.selected {
+  border-color: #8b1a30;
+  background-color: #f0e6e6;
+  box-shadow: 0 0 10px rgba(139, 26, 48, 0.2);
+}
+
+.combo-option .combo-name {
+  display: block;
+  font-weight: bold;
+}
+
+.combo-option .combo-price {
+  color: #8b1a30;
+}
+
+.adicionais-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 90%;
+  max-width: 500px;
+}
+
+.adicional-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.adicional-item:hover {
+  background-color: #f0f0f0;
+}
+
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 15px 15px 10px;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  color: #555;
+}
+
+
+// ESTILO LOGIN
+
+.login-page,
+.user-info-page,
+.verification-page,
+.welcome-page,
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.content-container {
+  flex: 1;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  cursor: pointer;
+  color: #999;
+  font-weight: bold;
+}
+
+.tab.active {
+  color: #9E1A2A;
+  border-bottom: 2px solid #9E1A2A;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.phone-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.country-code {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  height: 46px;
+}
+
+.flag {
+  margin-right: 5px;
+}
+
+.phone-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 0 4px 4px 0;
+  font-size: 16px;
+}
+
+.primary-button {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background-color: #9E1A2A;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 20px;
+}
+
+.primary-button.disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.terms-container {
+  display: flex;
+  align-items: flex-start;
+  margin: 20px 0;
+}
+
+.terms-container input {
+  margin-right: 10px;
+  margin-top: 3px;
+}
+
+.terms-container a {
+  color: #9E1A2A;
+  text-decoration: none;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.page-title h2 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.page-title p {
+  color: #666;
+}
+
+.verification-code-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 30px 0;
+}
+
+.verification-input {
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  font-size: 18px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.resend-container {
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: #9E1A2A;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.welcome-image {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.welcome-text {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.welcome-text h2 {
+  color: #333;
+  font-size: 24px;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 15px;
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info h3 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.profile-info p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.profile-menu {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  margin-right: 15px;
+  font-size: 20px;
+}
+
+.menu-text {
+  flex: 1;
+  color: #333;
+}
+
+.menu-arrow {
+  color: #999;
+  font-size: 20px;
+}
+
+.welcome-banner {
+  background-color: #9E1A2A;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.welcome-banner h3 {
+  margin: 0 0 5px 0;
+}
+
+.welcome-banner p {
+  margin: 0;
+}
+
+//CARRINHO:
+
+.cart-page {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #222;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8f9fa;
+
+  .text-tempo {
+    position: absolute;
+    top: 112px;
+    right: 25px;
+    font-size: 12px;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  }
+
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+
+    .back-button {
+      height: 45px;
+      margin: 12px 0;
+      padding: 0 10px 10px;
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .cart-items {
+    flex-grow: 1;
+
+    .cart-item {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      animation: fadeInUp 0.3s ease;
+
+      .item-main {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        font-size: 1rem;
+      }
+
+      .item-additionals {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+
+        .additional-item {
+          padding-left: 1rem;
+        }
+      }
+    }
+  }
+
+  .cart-total {
+    position: relative;
+    top: 30px;
+    left: 0;
+    bottom: 50px;
+    width: 100%;
+    color: #222;
+
+    .cart-summary {
+      padding-top: 1rem;
+      margin-bottom: 1rem;
+      border-top: 2px solid #ddd;
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+
+        &.total {
+          color: #0c1e42;
+          font-size: 1.2rem;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .finish-order-button {
+      width: 100%;
+      padding: 1rem;
+      margin: 30px 0 100px;
+      color: white;
+      border: none;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #590A21, #870F32);
+      text-transform: uppercase;
+      box-shadow: 0 5px 15px rgba(53, 1, 16, 0.4);
+      transition: all 0.3s ease;
+      cursor: pointer;
+
+      &:hover {
+        background: linear-gradient(135deg, #1e90ff, #0c1e42);
+        transform: scale(1.03);
+      }
+    }
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .empty-cart-container {
+    text-align: center;
+    padding: 40px 20px;
+    color: #333;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .empty-cart-image div {
+    background: linear-gradient(145deg, #fff 0%, #f1f1f1 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .empty-cart-image div:hover {
+    transform: scale(1.05);
+  }
+
+  .empty-cart-message h3 {
+    margin-top: 20px;
+    color: #8B1A30;
+    font-size: 1.8rem;
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  }
+
+  .empty-cart-message p {
+    margin-top: 10px;
+    color: #666;
+    font-size: 1rem;
+  }
+
+  .return-menu-button {
+    min-width: 100%;
+    margin: 20px auto;
+    padding: 10px 20px;
+    text-align: center;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #8B1A30, #B22234);
+    box-shadow: 0 4px 12px rgba(139, 26, 48, 0.4);
+    transition: background 0.3s ease, transform 0.2s ease;
+
+
+
+
+
+
+  }
+
+  .return-menu-button:hover {
+    background: #B22234;
+    transform: scale(1.03);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

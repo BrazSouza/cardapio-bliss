@@ -1,0 +1,178 @@
+@charset "UTF-8";
+:root {
+  /* Cores baseadas na logo Bliss Burger */
+  --primary-color: #8b1a30;
+  /* Vermelho escuro/bordô mais próximo da imagem */
+  --primary-light: #a52941;
+  /* Vermelho mais claro harmonizando com o cabeçalho */
+  --primary-dark: #701525;
+  /* Vermelho mais escuro para contraste */
+  --accent-color: #f9b95c;
+  /* Dourado/amarelo do logo para destaque */
+  --text-light: #fff;
+  /* Texto branco mantido */
+  --text-dark: #222;
+  /* Texto escuro ligeiramente ajustado */
+  --text-gray: #777;
+  /* Texto cinza ligeiramente ajustado */
+  --background-light: #fff;
+  /* Fundo branco mantido */
+  --background-gray: #f8f8f8;
+  /* Fundo cinza claro suavizado */
+  --border-color: #e5e5e5;
+  /* Cor de borda ligeiramente ajustada */
+}
+
+.banner-slideshow {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.banner-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.banner-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.banner-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-weight: bold;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: var(--primary-color);
+}
+
+/* Estilo para os botões de categorias */
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+  gap: 10px;
+}
+
+.categories__pill {
+  background-color: var(--background-light);
+  color: var(--text-gray);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.categories__pill--active {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border-color: var(--primary-color);
+}
+
+.categories__pill:not(.categories__pill--active):hover {
+  background-color: var(--primary-light);
+  color: var(--text-light);
+  border-color: var(--primary-light);
+}
+
+/* Estilos para categorias e itens do menu */
+.category-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 20px 0 15px;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-light);
+  padding-bottom: 5px;
+}
+
+.menu-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Animações */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Estado vazio (quando não há resultados) */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: var(--text-gray);
+}
+
+.empty-state__icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.empty-state__text {
+  font-size: 1.2rem;
+}/*# sourceMappingURL=menuTab.css.map */
