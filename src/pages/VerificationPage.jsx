@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import FooterNavigation from '../components/FooterNavigation';
@@ -14,44 +14,26 @@ const VerificationPage = () => {
   const { fullName, email, phoneNumber } = location.state || {};
 
   // Função para enviar código de verificação para o WhatsApp
-  const sendVerificationCode = async () => {
+  const sendVerificationCode = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      // Código de verificação aleatório
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
       console.log(`Código de verificação gerado: ${randomCode}`);
 
-      // No ambiente real, você chamaria uma API para enviar este código
-      // Aqui estamos simulando o envio
-      // Exemplo de API que você poderia usar:
-      /*
-      await fetch('sua-api-de-envio-whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          message: `Seu código de verificação Bliss Burger é: ${randomCode}`
-        })
-      });
-      */
-
-      // Simular um atraso de envio
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Armazenar o código na sessionStorage para verificação posterior
       sessionStorage.setItem('verificationCode', randomCode);
-
       setCodeSent(true);
       alert(`Simulação: Código ${randomCode} enviado para ${phoneNumber} via WhatsApp`);
-
     } catch (error) {
       console.error('Erro ao enviar código:', error);
       alert('Não foi possível enviar o código de verificação. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [phoneNumber]);
+
 
   useEffect(() => {
     // Enviar o código assim que o componente for montado
@@ -76,7 +58,7 @@ const VerificationPage = () => {
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [codeSent, phoneNumber]);
+  }, [codeSent, phoneNumber, sendVerificationCode]);
 
   const handleCodeChange = (index, value) => {
     // Only allow numbers

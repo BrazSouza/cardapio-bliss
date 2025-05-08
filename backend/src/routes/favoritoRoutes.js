@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const favoritoController = require('../controllers/favoritoController');
-const auth = require('../middleware/auth');
+const { autenticar } = require('../middleware/auth');
 
 // Todas as rotas de favoritos são protegidas por autenticação
-router.use(auth);
+router.use(autenticar);
 
 // Listar produtos favoritos
 router.get('/', favoritoController.getFavorites);
@@ -13,6 +13,6 @@ router.get('/', favoritoController.getFavorites);
 router.post('/', favoritoController.addFavorite);
 
 // Remover produto dos favoritos
-router.delete('/:productId', favoritoController.removeFavorite);
+router.delete('/:produtoId', favoritoController.removeFavorite);
 
 module.exports = router;

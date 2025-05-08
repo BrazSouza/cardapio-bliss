@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const gerarLinkWhatsapp = require('../utils/gerarLinkWhatsapp');
 
 /**
  * Função para criar um novo pedido, com suporte a agendamento
@@ -10,97 +11,115 @@ const prisma = new PrismaClient();
 // Criar um novo pedido
 const criarPedido = async (req, res) => {
 	try {
-		const { items } = req.body;
-		const userId = req.user.id; // Obtido do middleware de autenticação
+		const { clienteId, itens, observacoes, endereco } = req.body;
+		const usuarioId = req.usuario.id; // Obtido do middleware de autenticação
 
 		// Validar se há itens no pedido
-		if (!items || items.length === 0) {
+		if (!itens || itens.length === 0) {
 			return res.status(400).json({ message: 'O pedido deve conter pelo menos um item' });
 		}
+		console.log("Body recebido:", req.body);
 
 		// Iniciar uma transação para garantir consistência dos dados
-		const order = await prisma.$transaction(async (prisma) => {
+		const pedido = await prisma.$transaction(async (prisma) => {
+
+
+
+
 			// Buscar produtos para validar disponibilidade e preços
-			const productIds = items.map(item => item.productId);
-			const products = await prisma.product.findMany({
-				where: { id: { in: productIds }, available: true }
+			const productIds = itens.map(item => item.produtoId);
+			const produtos = await prisma.produto.findMany({
+				where: { id: { in: productIds }, disponivel: true }
 			});
 
 			// Verificar se todos os produtos estão disponíveis
-			if (products.length !== productIds.length) {
+			if (produtos.length !== productIds.length) {
 				throw new Error('Um ou mais produtos não estão disponíveis');
 			}
 
 			// Calcular o total e preparar os itens do pedido
 			let total = 0;
-			const orderItems = items.map(item => {
-				const product = products.find(p => p.id === item.productId);
-				const itemTotal = product.price * item.quantity;
+			const itensPedido = itens.map(item => {
+				const produto = produtos.find(p => p.id === item.produtoId);
+				const itemTotal = produto.preco * item.quantidade;
 				total += itemTotal;
 
 				return {
-					productId: item.productId,
-					quantity: item.quantity,
-					price: product.price // Preço no momento da compra
+					produtoId: item.produtoId,
+					quantidade: item.quantidade,
+					preco: produto.preco // Preço no momento da compra
 				};
 			});
 
 			// Criar o pedido com seus itens
-			return await prisma.order.create({
+			return await prisma.pedido.create({
 				data: {
-					userId,
-					total,
-					status: 'pending',
-					items: {
-						create: orderItems
-					}
+					clienteId,
+					status: 'pendente',
+					observacoes,
+					endereco,
+					// Outras propriedades...
 				},
 				include: {
-					items: {
+					cliente: true,
+					itens: {
 						include: {
-							product: true
+							produto: true
 						}
 					}
 				}
+
 			});
 		});
 
 		// Após criar o pedido com sucesso, gere o link do WhatsApp
-		const storePhoneNumber = process.env.STORE_PHONE_NUMBER; // Número do WhatsApp da loja no formato internacional (ex: 5511999999999)
-		const whatsappLink = generateWhatsAppLink(
-			storePhoneNumber,
-			order,
-			whatsappLink,
-			req.user
-		)
+		const numeroLoja = process.env.TELEFONE_LOJA;
+		const linkWhatsapp = gerarLinkWhatsapp(numeroLoja, pedido, req.usuario);
 
-		res.status(201).json(order);
+		// Enviar notificação em tempo real
+		const io = req.app.get('io');
+		notificationService.enviarNotificacaoNovoPedido(io, pedido);
+
+
+		return res.status(201).json({
+			pedido,
+			linkWhatsapp
+		});
+
 	} catch (error) {
 		console.error('Erro ao criar pedido:', error);
 		res.status(500).json({ message: 'Erro ao criar pedido', error: error.message });
 	}
+
+	return res.status(201).json({
+		pedido,
+		whatsappLink
+	});
+
 };
+
+
 
 // Listar pedidos do usuário logado
 const getUserOrders = async (req, res) => {
 	try {
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
-		const orders = await prisma.order.findMany({
-			where: { userId },
+		const pedidos = await prisma.pedido.findMany({
+			where: { usuarioId },
 			include: {
-				items: {
+				itens: {
 					include: {
-						product: true
+						produto: true
 					}
 				}
 			},
 			orderBy: {
-				createdAt: 'desc'
+				criadoEm: 'desc'
 			}
 		});
 
-		res.json(orders);
+		res.json(pedidos);
 	} catch (error) {
 		console.error('Erro ao buscar pedidos:', error);
 		res.status(500).json({ message: 'Erro ao buscar pedidos' });
@@ -111,27 +130,27 @@ const getUserOrders = async (req, res) => {
 const getOrderDetails = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
-		const order = await prisma.order.findFirst({
+		const pedido = await prisma.pedido.findFirst({
 			where: {
 				id: Number(id),
-				userId // Garante que o usuário só veja seus próprios pedidos
+				usuarioId // Garante que o usuário só veja seus próprios pedidos
 			},
 			include: {
-				items: {
+				itens: {
 					include: {
-						product: true
+						produto: true
 					}
 				}
 			}
 		});
 
-		if (!order) {
+		if (!pedido) {
 			return res.status(404).json({ message: 'Pedido não encontrado' });
 		}
 
-		res.json(order);
+		res.json(pedido);
 	} catch (error) {
 		console.error('Erro ao buscar detalhes do pedido:', error);
 		res.status(500).json({ message: 'Erro ao buscar detalhes do pedido' });
@@ -145,7 +164,7 @@ const updateOrderStatus = async (req, res) => {
 		const { status } = req.body;
 
 		// Lista de status válidos
-		const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+		const validStatuses = ["pendente", "confirmado", "emPreparo", 'out_for_delivery', "entregue", "cancelado"];
 
 		if (!validStatuses.includes(status)) {
 			return res.status(400).json({
@@ -154,21 +173,21 @@ const updateOrderStatus = async (req, res) => {
 			});
 		}
 
-		const order = await prisma.order.update({
+		const pedido = await prisma.pedido.update({
 			where: { id: Number(id) },
 			data: { status },
 			include: {
-				items: {
+				itens: {
 					include: {
-						product: true
+						produto: true
 					}
 				},
-				user: true,
-				address: true
+				usuario: true,
+				endereco: true
 			}
 		});
 
-		res.json(order);
+		res.json(pedido);
 	} catch (error) {
 		console.error('Erro ao atualizar status do pedido:', error);
 		res.status(500).json({ message: 'Erro ao atualizar status do pedido' });
@@ -179,39 +198,42 @@ const updateOrderStatus = async (req, res) => {
 const cancelOrder = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
 		// Buscar o pedido
-		const order = await prisma.order.findFirst({
-			where: { id: Number(id), userId }
+		const pedido = await prisma.pedido.findFirst({
+			where: { id: Number(id), usuarioId }
 		});
 
-		if (!order) {
+		if (!pedido) {
 			return res.status(404).json({ message: 'Pedido não encontrado' });
 		}
 
 		// Verificar se o pedido pode ser cancelado
-		if (order.status !== 'pending' && order.status !== 'confirmed') {
+		if (pedido.status !== "pendente" && pedido.status !== "confirmado") {
 			return res.status(400).json({
 				message: 'Apenas pedidos pendentes ou confirmados podem ser cancelados'
 			});
 		}
 
 		// Atualizar status para cancelado
-		const updatedOrder = await prisma.order.update({
+		const updatedOrder = await prisma.pedido.update({
 			where: { id: Number(id) },
-			data: { status: 'cancelled' }
+			data: { status: "cancelado" }
 		});
 
 		res.json({
 			message: 'Pedido cancelado com sucesso',
-			order: updatedOrder
+			pedido: updatedOrder
 		});
 	} catch (error) {
 		console.error('Erro ao cancelar pedido:', error);
 		res.status(500).json({ message: 'Erro ao cancelar pedido' });
 	}
 };
+
+
+
 
 
 

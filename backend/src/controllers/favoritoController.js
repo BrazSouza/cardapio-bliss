@@ -4,20 +4,20 @@ const prisma = new PrismaClient();
 // Listar produtos favoritos do usuário
 const getFavorites = async (req, res) => {
 	try {
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
+		const usuario = await prisma.usuario.findUnique({
+			where: { id: usuarioId },
 			include: {
-				favorites: {
+				favoritos: {
 					include: {
-						category: true
+						categoria: true
 					}
 				}
 			}
 		});
 
-		res.json(user.favorites);
+		res.json(usuario.favoritos);
 	} catch (error) {
 		console.error('Erro ao buscar favoritos:', error);
 		res.status(500).json({ message: 'Erro ao buscar favoritos' });
@@ -27,25 +27,25 @@ const getFavorites = async (req, res) => {
 // Adicionar produto aos favoritos
 const addFavorite = async (req, res) => {
 	try {
-		const userId = req.user.id;
-		const { productId } = req.body;
+		const usuarioId = req.usuario.id;
+		const { produtoId } = req.body;
 
 		// Verificar se o produto existe
-		const product = await prisma.product.findUnique({
-			where: { id: Number(productId) }
+		const produto = await prisma.produto.findUnique({
+			where: { id: Number(produtoId) }
 		});
 
-		if (!product) {
+		if (!produto) {
 			return res.status(404).json({ message: 'Produto não encontrado' });
 		}
 
 		// Verificar se já está nos favoritos
-		const exists = await prisma.user.findFirst({
+		const exists = await prisma.usuario.findFirst({
 			where: {
-				id: userId,
-				favorites: {
+				id: usuarioId,
+				favoritos: {
 					some: {
-						id: Number(productId)
+						id: Number(produtoId)
 					}
 				}
 			}
@@ -56,12 +56,12 @@ const addFavorite = async (req, res) => {
 		}
 
 		// Adicionar aos favoritos
-		await prisma.user.update({
-			where: { id: userId },
+		await prisma.usuario.update({
+			where: { id: usuarioId },
 			data: {
-				favorites: {
+				favoritos: {
 					connect: {
-						id: Number(productId)
+						id: Number(produtoId)
 					}
 				}
 			}
@@ -77,16 +77,16 @@ const addFavorite = async (req, res) => {
 // Remover produto dos favoritos
 const removeFavorite = async (req, res) => {
 	try {
-		const userId = req.user.id;
-		const { productId } = req.params;
+		const usuarioId = req.usuario.id;
+		const { produtoId } = req.params;
 
 		// Remover dos favoritos
-		await prisma.user.update({
-			where: { id: userId },
+		await prisma.usuario.update({
+			where: { id: usuarioId },
 			data: {
-				favorites: {
+				favoritos: {
 					disconnect: {
-						id: Number(productId)
+						id: Number(produtoId)
 					}
 				}
 			}

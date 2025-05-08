@@ -1,0 +1,120 @@
+.sidebar {
+	background-color: $bg-sidebar;
+	color: $white;
+	width: 250px;
+	height: 100vh;
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: $z-index-fixed;
+	transition: transform 0.3s ease;
+
+	&__header {
+		padding: $spacing-4;
+		border-bottom: 1px solid rgba($white, 0.1);
+
+		&-logo {
+			font-size: $font-size-xl;
+			font-weight: $font-weight-bold;
+		}
+	}
+
+	&__nav {
+		padding: $spacing-4 0;
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		li {
+			margin-bottom: $spacing-2;
+		}
+
+		a {
+			display: flex;
+			align-items: center;
+			padding: $spacing-3 $spacing-4;
+			color: $gray-300;
+			text-decoration: none;
+			transition: $transition-base;
+
+			&:hover {
+				background-color: rgba($white, 0.05);
+				color: $white;
+			}
+
+			&.active {
+				background-color: $primary;
+				color: $white;
+				border-radius: $border-radius-sm;
+			}
+
+			.material-icons {
+				margin-right: $spacing-3;
+				font-size: 18px;
+			}
+		}
+	}
+
+	&__footer {
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		padding: $spacing-4;
+		border-top: 1px solid rgba($white, 0.1);
+		font-size: $font-size-sm;
+		color: $gray-400;
+	}
+
+	// Responsividade
+	@include respond-to('md') {
+		// Tela média para cima - sidebar normal
+		transform: translateX(0);
+	}
+
+	@media (max-width: #{ $breakpoint-sm - 1px }) {
+		// Tela pequena - sidebar fora da tela por padrão
+		transform: translateX(-100%);
+
+		&.open {
+			transform: translateX(0);
+		}
+	}
+}
+
+// Overlay para quando a sidebar estiver aberta em dispositivos móveis
+.sidebar-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba($black, 0.5);
+	z-index: $z-index-modal-backdrop;
+
+	@media (max-width: #{ $breakpoint-sm - 1px }) {
+		&.active {
+			display: block;
+		}
+	}
+}
+
+// Botão para abrir/fechar a sidebar em dispositivos móveis
+.sidebar-toggle {
+	display: none;
+	background: none;
+	border: none;
+	color: $gray-600;
+	font-size: $font-size-xl;
+	cursor: pointer;
+	padding: $spacing-2;
+
+	@media (max-width: #{ $breakpoint-sm - 1px }) {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}

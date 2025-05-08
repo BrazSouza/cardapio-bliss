@@ -3,12 +3,12 @@ const prisma = require('../utils/prisma');
 // Lista todos os produtos
 async function getAllProducts(req, res) {
 	try {
-		const products = await prisma.product.findMany({
+		const produtos = await prisma.produto.findMany({
 			include: {
-				category: true,
+				categoria: true,
 			},
 		});
-		return res.json(products);
+		return res.json(produtos);
 	} catch (error) {
 		console.error('Erro ao listar produtos:', error);
 		return res.status(500).json({ error: 'Erro ao listar produtos' });
@@ -18,20 +18,20 @@ async function getAllProducts(req, res) {
 // Cria um novo produto
 async function createProduct(req, res) {
 	try {
-		const { name, description, price, imageUrl, available, categoryId } = req.body;
+		const { nome, descricao, preco, imagemUrl, disponivel, categoriaId } = req.body;
 
-		const product = await prisma.product.create({
+		const produto = await prisma.produto.create({
 			data: {
-				name,
-				description,
-				price: parseFloat(price),
-				imageUrl,
-				available: Boolean(available),
-				categoryId: Number(categoryId),
+				nome,
+				descricao,
+				preco: parseFloat(preco),
+				imagemUrl,
+				disponivel: Boolean(disponivel),
+				categoriaId: Number(categoriaId),
 			},
 		});
 
-		return res.status(201).json(product);
+		return res.status(201).json(produto);
 	} catch (error) {
 		console.error('Erro ao criar produto:', error);
 		return res.status(500).json({ error: 'Erro ao criar produto' });
@@ -43,18 +43,18 @@ async function getProductById(req, res) {
 	try {
 		const { id } = req.params;
 
-		const product = await prisma.product.findUnique({
+		const produto = await prisma.produto.findUnique({
 			where: { id: Number(id) },
 			include: {
-				category: true,
+				categoria: true,
 			},
 		});
 
-		if (!product) {
+		if (!produto) {
 			return res.status(404).json({ error: 'Produto não encontrado' });
 		}
 
-		return res.json(product);
+		return res.json(produto);
 	} catch (error) {
 		console.error('Erro ao buscar produto:', error);
 		return res.status(500).json({ error: 'Erro ao buscar produto' });
@@ -65,21 +65,21 @@ async function getProductById(req, res) {
 async function updateProduct(req, res) {
 	try {
 		const { id } = req.params;
-		const { name, description, price, imageUrl, available, categoryId } = req.body;
+		const { nome, descricao, preco, imagemUrl, disponivel, categoriaId } = req.body;
 
-		const product = await prisma.product.update({
+		const produto = await prisma.produto.update({
 			where: { id: Number(id) },
 			data: {
-				name,
-				description,
-				price: parseFloat(price),
-				imageUrl,
-				available: Boolean(available),
-				categoryId: Number(categoryId),
+				nome,
+				descricao,
+				preco: parseFloat(preco),
+				imagemUrl,
+				disponivel: Boolean(disponivel),
+				categoriaId: Number(categoriaId),
 			},
 		});
 
-		return res.json(product);
+		return res.json(produto);
 	} catch (error) {
 		console.error('Erro ao atualizar produto:', error);
 		return res.status(500).json({ error: 'Erro ao atualizar produto' });
@@ -91,7 +91,7 @@ async function deleteProduct(req, res) {
 	try {
 		const { id } = req.params;
 
-		await prisma.product.delete({
+		await prisma.produto.delete({
 			where: { id: Number(id) },
 		});
 
@@ -105,18 +105,18 @@ async function deleteProduct(req, res) {
 // Lista produtos por categoria
 async function getProductsByCategory(req, res) {
 	try {
-		const { categoryId } = req.params;
+		const { categoriaId } = req.params;
 
-		const products = await prisma.product.findMany({
+		const produtos = await prisma.produto.findMany({
 			where: {
-				categoryId: Number(categoryId),
+				categoriaId: Number(categoriaId),
 			},
 			include: {
-				category: true,
+				categoria: true,
 			},
 		});
 
-		return res.json(products);
+		return res.json(produtos);
 	} catch (error) {
 		console.error('Erro ao listar produtos por categoria:', error);
 		return res.status(500).json({ error: 'Erro ao listar produtos por categoria' });

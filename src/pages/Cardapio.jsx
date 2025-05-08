@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { menuData } from '../../src/data/menuData'
-import MenuTab from './MenuTab'; // Ajuste o caminho conforme necessário
+import { menuData } from '../data/menuData'
+import MenuTab from '../components/MenuTab'; // Ajuste o caminho conforme necessário
 
 const Cardapio = ({ pedirViaWhatsApp }) => {
 	const [searchTerm, setSearchTerm] = useState('');

@@ -1,53 +1,53 @@
 // utils/whatsapp.js
-const formatWhatsAppMessage = (order, user) => {
+const formatWhatsAppMessage = (pedido, usuario) => {
 	// Cabeçalho da mensagem
-	let message = `🛒 *NOVO PEDIDO #${order.id}*\n`;
-	message += `👤 *Cliente:* ${user.name}\n`;
-	message += `📞 *Telefone:* ${user.phone || 'Não informado'}\n\n`;
+	let message = `🛒 *NOVO PEDIDO #${pedido.id}*\n`;
+	message += `👤 *Cliente:* ${usuario.nome}\n`;
+	message += `📞 *Telefone:* ${usuario.telefone || 'Não informado'}\n\n`;
 
 	// Itens do pedido
 	message += `*ITENS DO PEDIDO:*\n`;
-	order.items.forEach(item => {
-		message += `• ${item.quantity}x ${item.product.name} - R$ ${(item.price * item.quantity).toFixed(2)}\n`;
+	pedido.itens.forEach(item => {
+		message += `• ${item.quantidade}x ${item.produto.nome} - R$ ${(item.preco * item.quantidade).toFixed(2)}\n`;
 		// Adiciona observações se houver
-		if (item.notes) {
-			message += `   _Obs: ${item.notes}_\n`;
+		if (item.observacoes) {
+			message += `   _Obs: ${item.observacoes}_\n`;
 		}
 	});
 
 	// Total e informações adicionais
-	message += `\n💰 *TOTAL: R$ ${order.total.toFixed(2)}*\n`;
+	message += `\n💰 *TOTAL: R$ ${pedido.total.toFixed(2)}*\n`;
 
 	// Método de pagamento
-	if (order.paymentMethod) {
-		message += `💳 *Pagamento:* ${order.paymentMethod}\n`;
-		if (order.changeNeeded) {
-			message += `🔄 *Troco para:* R$ ${order.changeNeeded.toFixed(2)}\n`;
+	if (pedido.metodoPagamento) {
+		message += `💳 *Pagamento:* ${pedido.metodoPagamento}\n`;
+		if (pedido.changeNeeded) {
+			message += `🔄 *Troco para:* R$ ${pedido.changeNeeded.toFixed(2)}\n`;
 		}
 	}
 
 	// Endereço de entrega se for delivery
-	if (order.address) {
+	if (pedido.endereco) {
 		message += `\n📍 *ENDEREÇO DE ENTREGA:*\n`;
-		message += `${order.address.street}, ${order.address.number}\n`;
-		if (order.address.complement) {
-			message += `${order.address.complement}\n`;
+		message += `${pedido.endereco.rua}, ${pedido.endereco.numero}\n`;
+		if (pedido.endereco.complemento) {
+			message += `${pedido.endereco.complemento}\n`;
 		}
-		message += `${order.address.neighborhood}, ${order.address.city}\n`;
-		message += `CEP: ${order.address.zipcode}\n`;
+		message += `${pedido.endereco.bairro}, ${pedido.endereco.cidade}\n`;
+		message += `CEP: ${pedido.endereco.cep}\n`;
 	}
 
 	// Observações gerais do pedido
-	if (order.notes) {
-		message += `\n📝 *OBSERVAÇÕES:*\n${order.notes}\n`;
+	if (pedido.observacoes) {
+		message += `\n📝 *OBSERVAÇÕES:*\n${pedido.observacoes}\n`;
 	}
 
 	return encodeURIComponent(message);
 };
 
 // Gera o link para WhatsApp
-const generateWhatsAppLink = (phoneNumber, order, user) => {
-	const message = formatWhatsAppMessage(order, user);
+const generateWhatsAppLink = (phoneNumber, pedido, usuario) => {
+	const message = formatWhatsAppMessage(pedido, usuario);
 	return `https://wa.me/${phoneNumber}?text=${message}`;
 };
 

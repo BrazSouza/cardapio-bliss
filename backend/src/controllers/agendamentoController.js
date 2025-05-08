@@ -29,22 +29,22 @@ const verificarDisponibilidade = async (req, res) => {
 		const intervalo = 30;     // 30 minutos
 
 		// Buscar pedidos já agendados para esta data
-		const pedidosAgendados = await prisma.order.findMany({
+		const pedidosAgendados = await prisma.pedido.findMany({
 			where: {
-				scheduledFor: {
+				agendadoPara: {
 					gte: new Date(`${data}T00:00:00Z`),
 					lt: new Date(`${data}T23:59:59Z`)
 				}
 			},
 			select: {
-				scheduledFor: true
+				agendadoPara: true
 			}
 		});
 
 		// Converter horários agendados para formato simples (HH:MM)
 		const horariosOcupados = pedidosAgendados.map(pedido => {
-			const hora = pedido.scheduledFor.getHours();
-			const minutos = pedido.scheduledFor.getMinutes();
+			const hora = pedido.agendadoPara.getHours();
+			const minutos = pedido.agendadoPara.getMinutes();
 			return `${hora.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}`;
 		});
 
@@ -67,7 +67,7 @@ const verificarDisponibilidade = async (req, res) => {
 		// Contar pedidos por horário
 		const contagemHorarios = {};
 		pedidosAgendados.forEach(pedido => {
-			const hora = pedido.scheduledFor.getHours();
+			const hora = pedido.agendadoPara.getHours();
 			const horarioBase = `${hora.toString().padStart(2, '0')}:00`;
 
 			if (!contagemHorarios[horarioBase]) {

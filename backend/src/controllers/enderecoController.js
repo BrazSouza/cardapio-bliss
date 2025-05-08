@@ -4,14 +4,14 @@ const prisma = new PrismaClient();
 // Listar endereços do usuário
 const getUserAddresses = async (req, res) => {
 	try {
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
-		const addresses = await prisma.address.findMany({
-			where: { userId },
-			orderBy: { isDefault: 'desc' }
+		const enderecos = await prisma.endereco.findMany({
+			where: { usuarioId },
+			orderBy: { padrao: 'desc' }
 		});
 
-		res.json(addresses);
+		res.json(enderecos);
 	} catch (error) {
 		console.error('Erro ao buscar endereços:', error);
 		res.status(500).json({ message: 'Erro ao buscar endereços' });
@@ -21,41 +21,41 @@ const getUserAddresses = async (req, res) => {
 // Adicionar novo endereço
 const addAddress = async (req, res) => {
 	try {
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 		const {
-			street,
-			number,
-			complement,
-			neighborhood,
-			city,
-			state,
-			zipcode,
-			isDefault
+			rua,
+			numero,
+			complemento,
+			bairro,
+			cidade,
+			estado,
+			cep,
+			padrao
 		} = req.body;
 
 		// Se este endereço for definido como padrão, remova o padrão dos outros
-		if (isDefault) {
-			await prisma.address.updateMany({
-				where: { userId },
-				data: { isDefault: false }
+		if (padrao) {
+			await prisma.endereco.updateMany({
+				where: { usuarioId },
+				data: { padrao: false }
 			});
 		}
 
-		const address = await prisma.address.create({
+		const endereco = await prisma.endereco.create({
 			data: {
-				userId,
-				street,
-				number,
-				complement,
-				neighborhood,
-				city,
-				state,
-				zipcode,
-				isDefault: isDefault || false
+				usuarioId,
+				rua,
+				numero,
+				complemento,
+				bairro,
+				cidade,
+				estado,
+				cep,
+				padrao: padrao || false
 			}
 		});
 
-		res.status(201).json(address);
+		res.status(201).json(endereco);
 	} catch (error) {
 		console.error('Erro ao adicionar endereço:', error);
 		res.status(500).json({ message: 'Erro ao adicionar endereço' });
@@ -66,21 +66,21 @@ const addAddress = async (req, res) => {
 const updateAddress = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 		const {
-			street,
-			number,
-			complement,
-			neighborhood,
-			city,
-			state,
-			zipcode,
-			isDefault
+			rua,
+			numero,
+			complemento,
+			bairro,
+			cidade,
+			estado,
+			cep,
+			padrao
 		} = req.body;
 
 		// Verificar se o endereço pertence ao usuário
-		const addressExists = await prisma.address.findFirst({
-			where: { id: Number(id), userId }
+		const addressExists = await prisma.endereco.findFirst({
+			where: { id: Number(id), usuarioId }
 		});
 
 		if (!addressExists) {
@@ -88,28 +88,28 @@ const updateAddress = async (req, res) => {
 		}
 
 		// Se este endereço for definido como padrão, remova o padrão dos outros
-		if (isDefault) {
-			await prisma.address.updateMany({
-				where: { userId, NOT: { id: Number(id) } },
-				data: { isDefault: false }
+		if (padrao) {
+			await prisma.endereco.updateMany({
+				where: { usuarioId, NOT: { id: Number(id) } },
+				data: { padrao: false }
 			});
 		}
 
-		const address = await prisma.address.update({
+		const endereco = await prisma.endereco.update({
 			where: { id: Number(id) },
 			data: {
-				street,
-				number,
-				complement,
-				neighborhood,
-				city,
-				state,
-				zipcode,
-				isDefault: isDefault || false
+				rua,
+				numero,
+				complemento,
+				bairro,
+				cidade,
+				estado,
+				cep,
+				padrao: padrao || false
 			}
 		});
 
-		res.json(address);
+		res.json(endereco);
 	} catch (error) {
 		console.error('Erro ao atualizar endereço:', error);
 		res.status(500).json({ message: 'Erro ao atualizar endereço' });
@@ -120,11 +120,11 @@ const updateAddress = async (req, res) => {
 const removeAddress = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
 		// Verificar se o endereço pertence ao usuário
-		const addressExists = await prisma.address.findFirst({
-			where: { id: Number(id), userId }
+		const addressExists = await prisma.endereco.findFirst({
+			where: { id: Number(id), usuarioId }
 		});
 
 		if (!addressExists) {
@@ -132,8 +132,8 @@ const removeAddress = async (req, res) => {
 		}
 
 		// Verificar se o endereço está sendo usado em algum pedido
-		const orderWithAddress = await prisma.order.findFirst({
-			where: { addressId: Number(id) }
+		const orderWithAddress = await prisma.pedido.findFirst({
+			where: { enderecoId: Number(id) }
 		});
 
 		if (orderWithAddress) {
@@ -142,7 +142,7 @@ const removeAddress = async (req, res) => {
 			});
 		}
 
-		await prisma.address.delete({
+		await prisma.endereco.delete({
 			where: { id: Number(id) }
 		});
 
@@ -157,11 +157,11 @@ const removeAddress = async (req, res) => {
 const setDefaultAddress = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.user.id;
+		const usuarioId = req.usuario.id;
 
 		// Verificar se o endereço pertence ao usuário
-		const addressExists = await prisma.address.findFirst({
-			where: { id: Number(id), userId }
+		const addressExists = await prisma.endereco.findFirst({
+			where: { id: Number(id), usuarioId }
 		});
 
 		if (!addressExists) {
@@ -169,18 +169,18 @@ const setDefaultAddress = async (req, res) => {
 		}
 
 		// Remover padrão de todos os endereços do usuário
-		await prisma.address.updateMany({
-			where: { userId },
-			data: { isDefault: false }
+		await prisma.endereco.updateMany({
+			where: { usuarioId },
+			data: { padrao: false }
 		});
 
 		// Definir o endereço selecionado como padrão
-		const address = await prisma.address.update({
+		const endereco = await prisma.endereco.update({
 			where: { id: Number(id) },
-			data: { isDefault: true }
+			data: { padrao: true }
 		});
 
-		res.json(address);
+		res.json(endereco);
 	} catch (error) {
 		console.error('Erro ao definir endereço padrão:', error);
 		res.status(500).json({ message: 'Erro ao definir endereço padrão' });

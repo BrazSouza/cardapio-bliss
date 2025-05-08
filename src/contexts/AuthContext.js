@@ -1,94 +1,97 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+// Localização: /src/context/AuthContext.js
 
-const AuthContext = createContext(null);
+import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
+import { useContext } from 'react';
+
+
+// Criar contexto de autenticação
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
+	const [currentUser, setCurrentUser] = useState(null);
+	const [token, setToken] = useState(localStorage.getItem('authToken') || null);
 	const [loading, setLoading] = useState(true);
-	const navigate = useNavigate(); // Hook para navegação
+	const [error, setError] = useState(null);
 
+	// Configurar o token de autenticação nas requisições axios
 	useEffect(() => {
-		const checkUserStatus = async () => {
+		if (token) {
+			axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+		} else {
+			delete axios.defaults.headers.common['Authorization'];
+		}
+	}, [token]);
+
+	// Verificar o token armazenado ao carregar a aplicação
+	useEffect(() => {
+		const verificarToken = async () => {
+			if (!token) {
+				setLoading(false);
+				return;
+			}
+
 			try {
-				const savedUser = localStorage.getItem('user');
-				if (savedUser) {
-					setUser(JSON.parse(savedUser));
+				setError(null);
+				const response = await axios.get('/api/auth/verificar');
+				setCurrentUser(response.data.usuario);
+			} catch (err) {
+				console.error('Erro ao verificar token:', err);
+
+				// Token inválido ou expirado, fazer logout
+				if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+					logout();
 				}
-			} catch (error) {
-				console.error('Erro ao recuperar dados do usuário:', error);
+
+				setError('Falha na autenticação, faça login novamente.');
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		checkUserStatus();
-	}, []);
+		verificarToken();
+	}, [token]);
 
-	// Modifique a função register no AuthContext.js
-	const register = async (userData) => {
-		try {
-			localStorage.setItem('user', JSON.stringify(userData));
-			setUser(userData); // Atualize o estado user primeiro
-
-			// Aguarde a próxima execução do ciclo de evento para garantir que o estado foi atualizado
-			setTimeout(() => {
-				navigate('/cardapio');
-			}, 0);
-
-			return { success: true };
-		} catch (error) {
-			console.error('Erro ao registrar usuário:', error);
-			return { success: false, error };
-		}
+	// Função de login
+	const login = (newToken, usuario) => {
+		localStorage.setItem('authToken', newToken);
+		setToken(newToken);
+		setCurrentUser(usuario);
+		setError(null);
 	};
 
-	const login = async (identifier) => {
-		try {
-			const normalizedIdentifier = identifier.trim().toLowerCase();
-			const savedUser = localStorage.getItem('user');
-			if (savedUser) {
-				const userData = JSON.parse(savedUser);
-				const nome = userData.nome?.toLowerCase();
-				const telefone = userData.telefone?.toLowerCase();
-				if (nome === normalizedIdentifier || telefone === normalizedIdentifier) {
-					setUser(userData);
-					return { success: true };
-				}
-			}
-			return { success: false, error: 'Usuário não encontrado' };
-		} catch (error) {
-			console.error('Erro ao fazer login:', error);
-			return { success: false, error };
-		}
-	};
-
-
+	// Função de logout
 	const logout = () => {
-		localStorage.clear();
-		setUser(null);
-		navigate('/'); // volta pra tela de login
+		localStorage.removeItem('authToken');
+		setToken(null);
+		setCurrentUser(null);
+		delete axios.defaults.headers.common['Authorization'];
 	};
 
+	// Verificar se o usuário é administrador
+	const isAdmin = () => {
+		return currentUser && currentUser.role === 'ADMIN';
+	};
+
+	const contextValue = {
+		currentUser,
+		token,
+		login,
+		logout,
+		isAdmin,
+		loading,
+		error
+	};
 
 	return (
-		<AuthContext.Provider value={{
-			user,
-			loading,
-			register,
-			login,
-			logout,
-			isAuthenticated: !!user
-		}}>
+		<AuthContext.Provider value={contextValue}>
 			{children}
 		</AuthContext.Provider>
 	);
 };
 
+export default AuthProvider;
+
 export const useAuth = () => {
-	const context = useContext(AuthContext);
-	if (!context) {
-		throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-	}
-	return context;
+	return useContext(AuthContext);
 };

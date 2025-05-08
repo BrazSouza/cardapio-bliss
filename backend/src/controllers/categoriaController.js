@@ -3,7 +3,7 @@ const prisma = require('../utils/prisma');
 // Lista todas as categorias
 async function getAllCategories(req, res) {
 	try {
-		const categories = await prisma.category.findMany();
+		const categories = await prisma.categoria.findMany();
 		return res.json(categories);
 	} catch (error) {
 		console.error('Erro ao listar categorias:', error);
@@ -14,16 +14,16 @@ async function getAllCategories(req, res) {
 // Cria uma nova categoria
 async function criarCategoria(req, res) {
 	try {
-		const { name, description } = req.body;
+		const { nome, descricao } = req.body;
 
-		const category = await prisma.category.create({
+		const categoria = await prisma.categoria.create({
 			data: {
-				name,
-				description,
+				nome,
+				descricao,
 			},
 		});
 
-		return res.status(201).json(category);
+		return res.status(201).json(categoria);
 	} catch (error) {
 		console.error('Erro ao criar categoria:', error);
 		return res.status(500).json({ error: 'Erro ao criar categoria' });
@@ -35,18 +35,18 @@ async function getCategoryById(req, res) {
 	try {
 		const { id } = req.params;
 
-		const category = await prisma.category.findUnique({
+		const categoria = await prisma.categoria.findUnique({
 			where: { id: Number(id) },
 			include: {
-				products: true,
+				produtos: true,
 			},
 		});
 
-		if (!category) {
+		if (!categoria) {
 			return res.status(404).json({ error: 'Categoria não encontrada' });
 		}
 
-		return res.json(category);
+		return res.json(categoria);
 	} catch (error) {
 		console.error('Erro ao buscar categoria:', error);
 		return res.status(500).json({ error: 'Erro ao buscar categoria' });
@@ -57,17 +57,17 @@ async function getCategoryById(req, res) {
 async function updateCategory(req, res) {
 	try {
 		const { id } = req.params;
-		const { name, description } = req.body;
+		const { nome, descricao } = req.body;
 
-		const category = await prisma.category.update({
+		const categoria = await prisma.categoria.update({
 			where: { id: Number(id) },
 			data: {
-				name,
-				description,
+				nome,
+				descricao,
 			},
 		});
 
-		return res.json(category);
+		return res.json(categoria);
 	} catch (error) {
 		console.error('Erro ao atualizar categoria:', error);
 		return res.status(500).json({ error: 'Erro ao atualizar categoria' });
@@ -79,7 +79,7 @@ async function deleteCategory(req, res) {
 	try {
 		const { id } = req.params;
 
-		await prisma.category.delete({
+		await prisma.categoria.delete({
 			where: { id: Number(id) },
 		});
 

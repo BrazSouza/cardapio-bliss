@@ -17,18 +17,24 @@ const ordemRoutes = require('./routes/ordemRoutes');
 const enderecoRoutes = require('./routes/enderecoRoutes');
 const favoritoRoutes = require('./routes/favoritoRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
-
-
+const rotaUsuario = require('./routes/usuarioRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 
 
 // Registrar rotas
 app.use('/api/auth', authRoutes);
-app.use('/api/products', produtoRoutes);
-app.use('/api/orders', ordemRoutes);
-app.use('/api/addresses', enderecoRoutes);
-app.use('/api/favorites', favoritoRoutes);
+app.use('/api/produtos', produtoRoutes);
+app.use('/api/pedidos', ordemRoutes);
+app.use('/api/enderecos', enderecoRoutes);
+app.use('/api/favoritos', favoritoRoutes);
 app.use('/api/agendamento', agendamentoRoutes);
+app.use('/api/usuarios', rotaUsuario);
+app.use('/api', adminRoutes);
+app.use('/api/admin/dashboard', dashboardRoutes);
+
+
 
 
 
