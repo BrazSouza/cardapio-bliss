@@ -87,9 +87,8 @@ export function CartProvider({ children }) {
 		setCart(currentCart => currentCart.filter(item => item.id !== id));
 	};
 
-	/**
-	 * Limpar todo o carrinho
-	 */
+	// Limpar carrinho
+
 	const clearCart = () => {
 		setCart([]);
 	};
@@ -129,4 +128,4 @@ export function CartProvider({ children }) {
 	);
 }
 
-export default CartContext;
+export const useCart = () => useContext(CartContext);

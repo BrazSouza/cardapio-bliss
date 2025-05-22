@@ -16,7 +16,7 @@ export const NotificationProvider = ({ children }) => {
 	useEffect(() => {
 		// Conectar apenas se o usuário estiver autenticado
 		if (isAuthenticated) {
-			const socketInstance = io(process.env.REACT_APP_API_URL || 'http://localhost:5000');
+			const socketInstance = io(process.env.REACT_APP_API_URL);
 
 			socketInstance.on('connect', () => {
 				console.log('Conectado ao servidor de notificações');

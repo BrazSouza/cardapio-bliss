@@ -9,141 +9,60 @@ datasource db {
   url = env("DATABASE_URL")
 }
 
-// Modelos de dados
-
+// Modelos adaptados para personalização
 model Usuario {
-  id Int        @id @default(autoincrement())
-  email String     @unique
-  senha String
-  role      String   @default("USER")  // Adicione o valor padrão
-  nome        String
-  telefone    String?
-  isAdmin   Boolean  @default(false)  // Campo para identificar administradores
-  criadoEm    DateTime   @default(now())
-  atualizadoEm DateTime  @updatedAt
-  pedidos     Pedido[]
-  enderecos   Endereco[]
-  favoritos   Produto[]  @relation("UsuarioFavoritos")
+  id           Int      @id @default(autoincrement())
+  nome         String
+  telefone     String
+  bairro       String
+  rua          String
+  cidade       String
+  numero       String
+  complemento  String?
+  criadoEm   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("usuarios")
 }
 
 model Categoria {
-  id Int       @id @default(autoincrement())
-  nome         String
-  descricao    String?
-  imagemUrl    String?
-  exibirOrdem  Int       @default(0)
-  ativo Boolean   @default(true)
-  produtos     Produto[]
+  id         Int       @id @default(autoincrement())
+  nome       String
+  descricao  String?
+  imagemUrl  String?
+  exibirOrdem Int      @default(0)
+  ativo      Boolean   @default(true)
+  produtos   Produto[]
 }
 
 model Produto {
-  id Int             @id @default(autoincrement())
+  id               Int               @id @default(autoincrement())
   nome             String
   descricao        String?
   preco            Float
-  promocionalPreco Float?
   imagemUrl        String?
   ingredientes     String?
-  horaDePreparacao Int?
-  calorias         Int?
-  destaque         Boolean         @default(false)
-  maisVendidos     Boolean         @default(false)
-  disponivel       Boolean         @default(true)
-  vegetariano      Boolean         @default(false)
-  naoContemGluten  Boolean         @default(false)
-  ePicante         Boolean         @default(false)
+  disponivel       Boolean           @default(true)
   categoriaId      Int
-  categoria        Categoria       @relation(fields: [categoriaId], references: [id])
-  itensPedido      ItemPedido[]
-  criadoEm         DateTime        @default(now())
-  atualizadoEm     DateTime        @updatedAt 
-  favoritadoPor    Usuario[]       @relation("UsuarioFavoritos")
+  categoria        Categoria         @relation(fields: [categoriaId], references: [id])
   opcoesProduto    OpcaoProduto[]
   adicionaisProduto AdicionalProduto[]
 }
 
 model OpcaoProduto {
-  id Int              @id @default(autoincrement())
-  nome           String
-  opcoes         String[]
-  obrigatorio    Boolean          @default(false)
-  produtoId      Int
-  produto        Produto          @relation(fields: [produtoId], references: [id])
-  opcoesItemPedido OpcaoItemPedido[]
+  id           Int      @id @default(autoincrement())
+  nome         String
+  opcoes       String[]
+  obrigatorio  Boolean  @default(false)
+  produtoId    Int
+  produto      Produto  @relation(fields: [produtoId], references: [id])
 }
 
 model AdicionalProduto {
-  id Int              @id @default(autoincrement())
-  nome            String
-  preco           Float
-  disponivel      Boolean          @default(true)
-  produtoId       Int
-  produto         Produto          @relation(fields: [produtoId], references: [id])
-  adicionaisItemPedido AdicionalItemPedido[]
+  id          Int      @id @default(autoincrement())
+  nome        String
+  preco       Float
+  disponivel  Boolean  @default(true)
+  produtoId   Int
+  produto     Produto  @relation(fields: [produtoId], references: [id])
 }
-
-model OpcaoItemPedido {
-  id Int             @id @default(autoincrement())
-  itemPedidoId     Int
-  itemPedido       ItemPedido      @relation(fields: [itemPedidoId], references: [id])
-  opcaoProdutoId   Int
-  opcaoProduto     OpcaoProduto    @relation(fields: [opcaoProdutoId], references: [id])
-  opcaoSelecionada String
-}
-
-model AdicionalItemPedido {
-  id Int              @id @default(autoincrement())
-  itemPedidoId    Int
-  itemPedido      ItemPedido       @relation(fields: [itemPedidoId], references: [id])
-  adicionalProdutoId Int
-  adicionalProduto  AdicionalProduto @relation(fields: [adicionalProdutoId], references: [id])
-  quantidade       Int             @default(1)
-  preco            Float
-}
-
-model Pedido {
-  id Int           @id @default(autoincrement())
-  usuarioId      Int
-  usuario        Usuario       @relation(fields: [usuarioId], references: [id])
-  status String        @default("pendente")
-  total Float
-  taxaEntrega    Float?
-  metodoPagamento String?
-  itens          ItemPedido[]
-  observacoes    String?
-  agendadoPara   DateTime?
-  criadoEm       DateTime      @default(now())
-  atualizadoEm   DateTime      @updatedAt
-  enderecoId     Int?
-  endereco       Endereco?     @relation(fields: [enderecoId], references: [id])
-}
-
-model ItemPedido {
-  id Int                 @id @default(autoincrement())
-  pedidoId       Int
-  pedido         Pedido              @relation(fields: [pedidoId], references: [id])
-  produtoId      Int
-  produto        Produto             @relation(fields: [produtoId], references: [id])
-  quantidade     Int
-  preco          Float
-  observacoes    String?
-  opcoes         OpcaoItemPedido[]
-  adicionais     AdicionalItemPedido[]
-}
-
-model Endereco {
-  id Int        @id @default(autoincrement())
-  usuarioId    Int
-  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
-  rua          String
-  numero       String
-  complemento  String?
-  bairro       String
-  cidade       String
-  estado       String
-  cep          String
-  padrao       Boolean    @default(false)
-  pedidos      Pedido[]
-  criadoEm     DateTime   @default(now())
-  atualizadoEm DateTime   @updatedAt
-  }

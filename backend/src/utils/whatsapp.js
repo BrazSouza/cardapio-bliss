@@ -1,57 +1,132 @@
-// utils/whatsapp.js
-const formatWhatsAppMessage = (pedido, usuario) => {
-	// Cabeçalho da mensagem
-	let message = `🛒 *NOVO PEDIDO #${pedido.id}*\n`;
-	message += `👤 *Cliente:* ${usuario.nome}\n`;
-	message += `📞 *Telefone:* ${usuario.telefone || 'Não informado'}\n\n`;
+/**
+ * Utilitário para gerar links de WhatsApp e formatar mensagens
+ */
 
-	// Itens do pedido
-	message += `*ITENS DO PEDIDO:*\n`;
-	pedido.itens.forEach(item => {
-		message += `• ${item.quantidade}x ${item.produto.nome} - R$ ${(item.preco * item.quantidade).toFixed(2)}\n`;
-		// Adiciona observações se houver
+// Número do WhatsApp da lanchonete (inclua o código do país)
+const LANCHONETE_WHATSAPP = '5599999999999'; // Substitua pelo número real
+
+/**
+ * Formata um pedido para envio via WhatsApp
+ * @param {Object} pedido - Dados do pedido
+ * @param {Array} pedido.itens - Itens do pedido
+ * @param {number} pedido.total - Valor total do pedido
+ * @param {Object} usuario - Dados do usuário
+ * @returns {string} - Mensagem formatada para envio
+ */
+export const formatarPedidoWhatsapp = (pedido, usuario) => {
+	if (!pedido || !pedido.itens || !pedido.itens.length) {
+		throw new Error('Nenhum item no carrinho');
+	}
+
+	if (!usuario || !usuario.nome || !usuario.endereco || !usuario.telefone) {
+		throw new Error('Informações do usuário incompletas');
+	}
+
+	let mensagem = '🍔 *NOVO PEDIDO* 🍔\n\n';
+
+	// Informações do cliente
+	mensagem += '*DADOS DO CLIENTE*\n';
+	mensagem += `👤 *Nome*: ${usuario.nome}\n`;
+	mensagem += `📞 *Telefone*: ${usuario.telefone}\n`;
+	mensagem += `📍 *Endereço*: ${usuario.endereco}\n`;
+
+	if (usuario.complemento) {
+		mensagem += `🏠 *Complemento*: ${usuario.complemento}\n`;
+	}
+
+	if (usuario.referencia) {
+		mensagem += `🔍 *Referência*: ${usuario.referencia}\n`;
+	}
+
+	mensagem += '\n*ITENS DO PEDIDO*\n';
+
+	// Lista de itens
+	pedido.itens.forEach((item, index) => {
+		mensagem += `\n*${index + 1}. ${item.nome}* - ${item.quantidade}x\n`;
+		mensagem += `   💰 Valor unitário: R$ ${parseFloat(item.preco).toFixed(2)}\n`;
+
+		// Adiciona as opções selecionadas
+		if (item.opcoesSelecionadas && item.opcoesSelecionadas.length > 0) {
+			mensagem += '   *Opções escolhidas*:\n';
+			item.opcoesSelecionadas.forEach(opcao => {
+				const precoAdicional = opcao.precoAdicional > 0
+					? ` (+R$ ${parseFloat(opcao.precoAdicional).toFixed(2)})`
+					: '';
+				mensagem += `   - ${opcao.nome}${precoAdicional}\n`;
+			});
+		}
+
+		// Adiciona os adicionais
+		if (item.adicionais && item.adicionais.length > 0) {
+			mensagem += '   *Adicionais*:\n';
+			item.adicionais.forEach(adicional => {
+				mensagem += `   - ${adicional.nome} (+R$ ${parseFloat(adicional.preco).toFixed(2)})\n`;
+			});
+		}
+
+		// Adiciona observações, se houver
 		if (item.observacoes) {
-			message += `   _Obs: ${item.observacoes}_\n`;
+			mensagem += `   *Observações*: ${item.observacoes}\n`;
 		}
 	});
 
-	// Total e informações adicionais
-	message += `\n💰 *TOTAL: R$ ${pedido.total.toFixed(2)}*\n`;
+	// Informações de pagamento
+	mensagem += '\n*RESUMO*\n';
+	mensagem += `💵 *Total do pedido*: R$ ${pedido.total.toFixed(2)}\n`;
 
-	// Método de pagamento
-	if (pedido.metodoPagamento) {
-		message += `💳 *Pagamento:* ${pedido.metodoPagamento}\n`;
-		if (pedido.changeNeeded) {
-			message += `🔄 *Troco para:* R$ ${pedido.changeNeeded.toFixed(2)}\n`;
+	if (pedido.formaPagamento) {
+		mensagem += `💳 *Forma de pagamento*: ${pedido.formaPagamento}\n`;
+
+		if (pedido.formaPagamento.toLowerCase().includes('dinheiro') && pedido.troco) {
+			mensagem += `💰 *Troco para*: R$ ${parseFloat(pedido.troco).toFixed(2)}\n`;
 		}
 	}
 
-	// Endereço de entrega se for delivery
-	if (pedido.endereco) {
-		message += `\n📍 *ENDEREÇO DE ENTREGA:*\n`;
-		message += `${pedido.endereco.rua}, ${pedido.endereco.numero}\n`;
-		if (pedido.endereco.complemento) {
-			message += `${pedido.endereco.complemento}\n`;
-		}
-		message += `${pedido.endereco.bairro}, ${pedido.endereco.cidade}\n`;
-		message += `CEP: ${pedido.endereco.cep}\n`;
-	}
-
-	// Observações gerais do pedido
-	if (pedido.observacoes) {
-		message += `\n📝 *OBSERVAÇÕES:*\n${pedido.observacoes}\n`;
-	}
-
-	return encodeURIComponent(message);
+	return mensagem;
 };
 
-// Gera o link para WhatsApp
-const generateWhatsAppLink = (phoneNumber, pedido, usuario) => {
-	const message = formatWhatsAppMessage(pedido, usuario);
-	return `https://wa.me/${phoneNumber}?text=${message}`;
+/**
+ * Gera um link para WhatsApp com a mensagem de pedido formatada
+ * @param {Object} pedido - Dados do pedido
+ * @param {Object} usuario - Dados do usuário
+ * @returns {string} - URL para abrir o WhatsApp com a mensagem pré-preenchida
+ */
+export const gerarLinkWhatsapp = (pedido, usuario) => {
+	try {
+		const mensagem = formatarPedidoWhatsapp(pedido, usuario);
+
+		// Codifica a mensagem para URL
+		const mensagemCodificada = encodeURIComponent(mensagem);
+
+		// Gera o link do WhatsApp
+		return `https://wa.me/${LANCHONETE_WHATSAPP}?text=${mensagemCodificada}`;
+	} catch (error) {
+		console.error('Erro ao gerar link do WhatsApp:', error);
+		throw error;
+	}
 };
 
-module.exports = {
-	formatWhatsAppMessage,
-	generateWhatsAppLink
+/**
+ * Abre o WhatsApp com o pedido formatado
+ * @param {Object} pedido - Dados do pedido
+ * @param {Object} usuario - Dados do usuário
+ * @returns {boolean} - Verdadeiro se aberto com sucesso
+ */
+export const abrirWhatsappComPedido = (pedido, usuario) => {
+	try {
+		const link = gerarLinkWhatsapp(pedido, usuario);
+
+		// Abre o link em uma nova janela/aba
+		window.open(link, '_blank');
+		return true;
+	} catch (error) {
+		console.error('Erro ao abrir WhatsApp:', error);
+		return false;
+	}
+};
+
+export default {
+	formatarPedidoWhatsapp,
+	gerarLinkWhatsapp,
+	abrirWhatsappComPedido
 };

@@ -31,31 +31,7 @@
 		}
 	}
 
-	// Quando a sidebar está recolhida
-	&--collapsed {
-		.admin-layout__content {
-			// margin-left: $sidebar-width-collapsed;
-			// width: calc(100% - #{$sidebar-width-collapsed});
-
-			@include respond-to('mobile') {
-				margin-left: 0;
-				width: 100%;
-			}
-		}
-	}
-
-	// Quando a sidebar está expandida
-	&--expanded {
-		.admin-layout__content {
-			// margin-left: $sidebar-width;
-			// width: calc(100% - #{$sidebar-width});
-
-			@include respond-to('mobile') {
-				margin-left: 0;
-				width: 100%;
-			}
-		}
-	}
+	
 
 	// Overlay para dispositivos móveis quando o menu está aberto
 	&__overlay {

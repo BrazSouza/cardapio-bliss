@@ -1,14 +1,15 @@
-// Localização: /src/pages/Login.jsx
-
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 
+console.log('URL da API:', import.meta.env.VITE_API_URL);
+
+
 function Login() {
 	const [formData, setFormData] = useState({
-		email: '',
-		senha: ''
+		nome: '',
+		telefone: ''
 	});
 	const [erro, setErro] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,13 @@ function Login() {
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setFormData(prev => ({ ...prev, [name]: value }));
+		// Limpar mensagem de erro quando o usuário começa a digitar novamente
+		if (erro) setErro('');
+	};
+
+	// Função para formatar o telefone removendo caracteres não numéricos
+	const formatarTelefone = (tel) => {
+		return tel.replace(/\D/g, '');
 	};
 
 	const handleSubmit = async (e) => {
@@ -26,37 +34,66 @@ function Login() {
 		setIsLoading(true);
 
 		try {
-			// Validação básica
-			if (!formData.email || !formData.senha) {
-				setErro('Email e senha são obrigatórios');
+			const { nome, telefone } = formData;
+
+			if (!nome || !telefone) {
+				setErro('Nome e telefone são obrigatórios');
 				setIsLoading(false);
 				return;
 			}
 
-			// Enviar requisição para a API
-			const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+			// Formatar o telefone para remover caracteres não numéricos
+			const telefoneFormatado = formatarTelefone(telefone);
 
-			// Salvar token e informações do usuário no contexto
-			login(response.data.token, response.data.usuario);
-
-			// Redirecionar com base no papel do usuário
-			if (response.data.usuario.role === 'ADMIN') {
-				navigate('/dashboard');
-			} else {
-				navigate('/dashboard');
+			// Verificação mais flexível do telefone
+			if (telefoneFormatado.length < 10 || telefoneFormatado.length > 11) {
+				setErro('O telefone deve conter 10 ou 11 dígitos numéricos');
+				setIsLoading(false);
+				return;
 			}
+
+			const API_BASE = import.meta.env.VITE_API_URL;
+			axios.defaults.baseURL = API_BASE;
+
+
+
+			// Log para depuração
+			console.log('Enviando requisição para:', `${API_BASE}/api/auth/login`);
+			console.log('Dados enviados:', { nome, telefone: telefoneFormatado });
+
+			const response = await axios.post(`${API_BASE}/api/auth/login`, {
+				nome,
+				telefone: telefoneFormatado
+			});
+
+			console.log('Resposta do servidor:', response.data);
+
+			if (response.data && response.data.token) {
+				// Verificação mais robusta dos dados retornados
+				login(response.data.token, response.data.usuario || {});
+				navigate('/cardapio');
+			} else {
+				setErro('Resposta do servidor inválida. Tente novamente.');
+			}
+
 		} catch (error) {
 			console.error('Erro no login:', error);
 
 			if (error.response) {
-				// Erro retornado pelo servidor
-				setErro(error.response.data.error || 'Credenciais inválidas');
+				// Mensagem de erro mais detalhada e específica
+				console.log('Detalhes do erro:', error.response);
+
+				if (error.response.status === 401) {
+					setErro('Nome ou telefone incorretos. Verifique suas credenciais.');
+				} else if (error.response.status === 404) {
+					setErro('Usuário não encontrado. Verifique se está cadastrado.');
+				} else {
+					setErro(error.response.data?.error || 'Erro ao processar requisição');
+				}
 			} else if (error.request) {
-				// A requisição foi feita mas não houve resposta
-				setErro('Não foi possível conectar ao servidor');
+				setErro('Não foi possível conectar ao servidor. Verifique sua conexão.');
 			} else {
-				// Algo aconteceu na configuração da requisição
-				setErro('Erro ao realizar login');
+				setErro('Erro ao realizar login. Tente novamente mais tarde.');
 			}
 		} finally {
 			setIsLoading(false);
@@ -71,7 +108,7 @@ function Login() {
 						Entrar
 					</h2>
 					<p className="mt-2 text-center text-sm text-gray-600">
-						Acesse sua conta para continuar
+						Acesse sua conta com seu nome e telefone
 					</p>
 				</div>
 
@@ -84,33 +121,37 @@ function Login() {
 				<form className="mt-8 space-y-6" onSubmit={handleSubmit}>
 					<div className="rounded-md shadow-sm -space-y-px">
 						<div>
-							<label htmlFor="email" className="sr-only">Email</label>
+							<label htmlFor="nome" className="sr-only">Nome completo</label>
 							<input
-								id="email"
-								name="email"
-								type="email"
-								autoComplete="email"
+								id="nome"
+								name="nome"
+								type="text"
+								autoComplete="name"
 								required
 								className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-								placeholder="Email"
-								value={formData.email}
+								placeholder="Nome completo"
+								value={formData.nome}
 								onChange={handleChange}
 							/>
 						</div>
 						<div>
-							<label htmlFor="senha" className="sr-only">Senha</label>
+							<label htmlFor="telefone" className="sr-only">Telefone</label>
 							<input
-								id="senha"
-								name="senha"
-								type="password"
-								autoComplete="current-password"
+								id="telefone"
+								name="telefone"
+								type="tel"
+								autoComplete="tel"
 								required
 								className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-								placeholder="Senha"
-								value={formData.senha}
+								placeholder="Telefone (ex: 27999999999)"
+								value={formData.telefone}
 								onChange={handleChange}
 							/>
 						</div>
+					</div>
+
+					<div className="text-xs text-gray-500">
+						Digite apenas os números do telefone com DDD (ex: 27999999999)
 					</div>
 
 					<div className="flex items-center justify-between">
@@ -124,12 +165,6 @@ function Login() {
 							<label htmlFor="lembrar" className="ml-2 block text-sm text-gray-900">
 								Lembrar-me
 							</label>
-						</div>
-
-						<div className="text-sm">
-							<Link to="/esqueceu-senha" className="font-medium text-blue-600 hover:text-blue-500">
-								Esqueceu sua senha?
-							</Link>
 						</div>
 					</div>
 
@@ -159,7 +194,7 @@ function Login() {
 					<div className="text-center">
 						<p className="text-sm text-gray-600">
 							Não tem uma conta?{' '}
-							<Link to="/dashboard" className="font-medium text-blue-600 hover:text-blue-500">
+							<Link to="/registro" className="font-medium text-blue-600 hover:text-blue-500">
 								Registre-se
 							</Link>
 						</p>

@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Componente para exibir um item no carrinho

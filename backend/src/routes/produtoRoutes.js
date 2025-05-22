@@ -4,6 +4,12 @@ const produtoController = require('../controllers/produtoController');
 
 const router = express.Router();
 
+// Rotas públicas
+router.get('/', produtoController.listarProdutos);
+router.get('/categorias', produtoController.listarCategorias);
+router.get('/categoria/:categoriaId', produtoController.obterProdutosPorCategoria);
+router.get('/:id', produtoController.obterProdutoPorId);
+
 // Rotas de categoria
 router.get('/categories', categoriaController.getAllCategories);
 router.get('/categories/:id', categoriaController.getCategoryById);
@@ -12,12 +18,12 @@ router.put('/categories/:id', categoriaController.updateCategory);
 router.delete('/categories/:id', categoriaController.deleteCategory);
 
 // Rotas de produto
-router.get('/produtos', produtoController.getAllProducts);
-router.get('/produtos/:id', produtoController.getProductById);
-router.post('/produtos', produtoController.createProduct);
-router.put('/produtos/:id', produtoController.updateProduct);
-router.delete('/produtos/:id', produtoController.deleteProduct);
-router.get('/categories/:categoriaId/produtos', produtoController.getProductsByCategory);
+// router.get('/produtos', produtoController.getAllProducts);
+// router.get('/produtos/:id', produtoController.getProductById);
+// router.post('/produtos', produtoController.createProduct);
+// router.put('/produtos/:id', produtoController.updateProduct);
+// router.delete('/produtos/:id', produtoController.deleteProduct);
+// router.get('/categories/:categoriaId/produtos', produtoController.getProductsByCategory);
 
 router.get('/', (req, res) => {
 	res.json({ message: 'Burger, Refri, Açai, Pizza' });

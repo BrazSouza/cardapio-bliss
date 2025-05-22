@@ -1,15 +1,18 @@
-import React from 'react';
+// Correção mais robusta do FooterNavigation.jsx
+
 import { useCart } from './CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const FooterNavigation = ({ isEnabled = true }) => {
-	const { cartItems } = useCart();
-	const { isAuthenticated } = useAuth();
+	// Aqui está o problema: cartItems pode estar vindo como undefined
+	const { cartItems = [] } = useCart() || {}; // Garante que se useCart retornar undefined, usamos um objeto vazio, e garante que cartItems será um array vazio se não existir
+	const auth = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	if (!isAuthenticated) return null;
+	// Verificação segura da autenticação
+	if (!auth || !auth.token || !auth.currentUser) return null;
 
 	const navigationItems = [
 		{
@@ -23,13 +26,14 @@ const FooterNavigation = ({ isEnabled = true }) => {
 			label: 'Pedidos',
 			route: '/carrinho',
 			active: location.pathname === '/carrinho',
-			badge: cartItems.length
+			// Certifique-se de que cartItems existe e tem a propriedade length
+			badge: cartItems && Array.isArray(cartItems) ? cartItems.length : 0
 		},
 		{
 			icon: '👤',
 			label: 'Perfil',
-			route: '/perfil',
-			active: location.pathname === '/perfil'
+			route: '/perfil/editar',
+			active: location.pathname === '/perfil/editar'
 		}
 	];
 
@@ -46,7 +50,7 @@ const FooterNavigation = ({ isEnabled = true }) => {
 				borderTop: '2px solid #8B1A30',
 				background: '#FCF6F5',
 				opacity: isEnabled ? 1 : 0.5,
-				pointerEvents: isEnabled ? 'auto' : 'none' // bloqueia clique se não estiver habilitado
+				pointerEvents: isEnabled ? 'auto' : 'none'
 			}}
 		>
 			<div className="d-flex justify-content-around align-items-center">

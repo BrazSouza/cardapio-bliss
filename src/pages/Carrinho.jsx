@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CartItem from '../components/cart/CartItem';
-import OrderSummary from '../components/cart/ResumoPedido';
-import { CartContext } from '../contexts/CartContext';
+import CartItem from '../admin/components/cart/CartItem';
+import OrderSummary from '../admin/components/cart/ResumoPedido';
 
 function Carrinho() {
-	const { cart, updateItemQuantity, removeItem, clearCart } = useContext(CartContext);
+	const { cart, updateItemQuantity, removeItem, clearCart } = useCart();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const navigate = useNavigate();
 

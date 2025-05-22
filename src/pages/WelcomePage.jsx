@@ -28,7 +28,7 @@ const WelcomePage = () => {
             if (isAuthenticated) {
               navigate('/cardapio');
             } else {
-              navigate('/perfil/editar');
+              navigate('/login');
             }
           }}
         >

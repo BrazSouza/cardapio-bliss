@@ -1,133 +1,84 @@
-const prisma = require('../utils/prisma');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-// Lista todos os produtos
-async function getAllProducts(req, res) {
+exports.listarProdutos = async (req, res) => {
 	try {
 		const produtos = await prisma.produto.findMany({
+			where: { disponivel: true },
 			include: {
 				categoria: true,
-			},
+				opcoesProduto: true,
+				adicionaisProduto: true
+			}
 		});
-		return res.json(produtos);
-	} catch (error) {
-		console.error('Erro ao listar produtos:', error);
-		return res.status(500).json({ error: 'Erro ao listar produtos' });
-	}
-}
 
-// Cria um novo produto
-async function createProduct(req, res) {
+		res.json(produtos);
+	} catch (erro) {
+		console.error('Erro ao listar produtos:', erro);
+		res.status(500).json({ mensagem: 'Erro ao listar produtos' });
+	}
+};
+
+exports.listarCategorias = async (req, res) => {
 	try {
-		const { nome, descricao, preco, imagemUrl, disponivel, categoriaId } = req.body;
-
-		const produto = await prisma.produto.create({
-			data: {
-				nome,
-				descricao,
-				preco: parseFloat(preco),
-				imagemUrl,
-				disponivel: Boolean(disponivel),
-				categoriaId: Number(categoriaId),
-			},
+		const categorias = await prisma.categoria.findMany({
+			where: { ativo: true },
+			orderBy: { exibirOrdem: 'asc' }
 		});
 
-		return res.status(201).json(produto);
-	} catch (error) {
-		console.error('Erro ao criar produto:', error);
-		return res.status(500).json({ error: 'Erro ao criar produto' });
+		res.json(categorias);
+	} catch (erro) {
+		console.error('Erro ao listar categorias:', erro);
+		res.status(500).json({ mensagem: 'Erro ao listar categorias' });
 	}
-}
+};
 
-// Obtém um produto pelo ID
-async function getProductById(req, res) {
-	try {
-		const { id } = req.params;
-
-		const produto = await prisma.produto.findUnique({
-			where: { id: Number(id) },
-			include: {
-				categoria: true,
-			},
-		});
-
-		if (!produto) {
-			return res.status(404).json({ error: 'Produto não encontrado' });
-		}
-
-		return res.json(produto);
-	} catch (error) {
-		console.error('Erro ao buscar produto:', error);
-		return res.status(500).json({ error: 'Erro ao buscar produto' });
-	}
-}
-
-// Atualiza um produto
-async function updateProduct(req, res) {
-	try {
-		const { id } = req.params;
-		const { nome, descricao, preco, imagemUrl, disponivel, categoriaId } = req.body;
-
-		const produto = await prisma.produto.update({
-			where: { id: Number(id) },
-			data: {
-				nome,
-				descricao,
-				preco: parseFloat(preco),
-				imagemUrl,
-				disponivel: Boolean(disponivel),
-				categoriaId: Number(categoriaId),
-			},
-		});
-
-		return res.json(produto);
-	} catch (error) {
-		console.error('Erro ao atualizar produto:', error);
-		return res.status(500).json({ error: 'Erro ao atualizar produto' });
-	}
-}
-
-// Remove um produto
-async function deleteProduct(req, res) {
-	try {
-		const { id } = req.params;
-
-		await prisma.produto.delete({
-			where: { id: Number(id) },
-		});
-
-		return res.json({ message: 'Produto removido com sucesso' });
-	} catch (error) {
-		console.error('Erro ao remover produto:', error);
-		return res.status(500).json({ error: 'Erro ao remover produto' });
-	}
-}
-
-// Lista produtos por categoria
-async function getProductsByCategory(req, res) {
+exports.obterProdutosPorCategoria = async (req, res) => {
 	try {
 		const { categoriaId } = req.params;
 
 		const produtos = await prisma.produto.findMany({
 			where: {
-				categoriaId: Number(categoriaId),
+				categoriaId: parseInt(categoriaId),
+				disponivel: true
+			},
+			include: {
+				opcoesProduto: true,
+				adicionaisProduto: true
+			}
+		});
+
+		res.json(produtos);
+	} catch (erro) {
+		console.error('Erro ao obter produtos por categoria:', erro);
+		res.status(500).json({ mensagem: 'Erro ao obter produtos' });
+	}
+};
+
+exports.obterProdutoPorId = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const produto = await prisma.produto.findUnique({
+			where: {
+				id: parseInt(id)
 			},
 			include: {
 				categoria: true,
-			},
+				opcoesProduto: true,
+				adicionaisProduto: {
+					where: { disponivel: true }
+				}
+			}
 		});
 
-		return res.json(produtos);
-	} catch (error) {
-		console.error('Erro ao listar produtos por categoria:', error);
-		return res.status(500).json({ error: 'Erro ao listar produtos por categoria' });
-	}
-}
+		if (!produto) {
+			return res.status(404).json({ mensagem: 'Produto não encontrado' });
+		}
 
-module.exports = {
-	getAllProducts,
-	createProduct,
-	getProductById,
-	updateProduct,
-	deleteProduct,
-	getProductsByCategory,
+		res.json(produto);
+	} catch (erro) {
+		console.error('Erro ao obter produto:', erro);
+		res.status(500).json({ mensagem: 'Erro ao obter produto' });
+	}
 };
